@@ -342,14 +342,56 @@
   </div>
 </footer>
 
+
 <script>
-function handleSubmit(e) {
+async function handleSubmit(e) {
   e.preventDefault();
   const btn = e.target.querySelector('button[type="submit"]');
-  btn.textContent = 'Message envoyé ✓';
-  btn.style.background = '#2a6b3a';
-  btn.style.color = '#fff';
+  
+  // 1. On change le bouton pendant l'envoi
+  btn.textContent = 'Envoi en cours...';
   btn.disabled = true;
+
+  // 2. On récupère les 5 champs du formulaire Onyxia
+  const inputs = e.target.querySelectorAll('input, select, textarea');
+  const formData = {
+    nom: inputs[0].value,
+    entreprise: inputs[1].value,
+    email: inputs[2].value,
+    besoin: inputs[3].value,
+    message: inputs[4].value
+  };
+
+  // 3. Votre URL n8n
+  const webhookUrl = 'https://onyxia-noel.app.n8n.cloud/webhook-test/inscription-noeme';
+
+  try {
+    // 4. Envoi à n8n
+    const response = await fetch(webhookUrl, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify(formData)
+    });
+
+    if (!response.ok) {
+      throw new Error(`Erreur réseau: ${response.status}`);
+    }
+
+    // 5. Succès !
+    btn.textContent = 'Message envoyé ✓';
+    btn.style.background = '#2a6b3a';
+    btn.style.color = '#fff';
+
+  } catch(error) {
+    // 6. En cas d'erreur (CORS ou autre)
+    console.error("Erreur:", error);
+    btn.textContent = 'Erreur. Réessayez';
+    btn.style.background = '#8B0000';
+    btn.style.color = '#fff';
+    btn.disabled = false;
+  }
 }
 </script>
 </body>
